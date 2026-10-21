@@ -8,13 +8,19 @@ on:
 
 jobs:
   build:
-    # ubuntu-22.04 runners are being retired (unsupported from 2027-04-17), so use 24.04
-    runs-on: ubuntu-24.04
+    # NDK 16.1.4479499 requires libncurses.so.5, available on Ubuntu 22.04.
+    # Keep the legacy toolchain and use the runner image that provides its runtime dependency.
+    runs-on: ubuntu-22.04
     timeout-minutes: 120
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Install compatibility library for NDK r16b
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libncurses5
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -23,8 +29,6 @@ jobs:
           java-version: '17'
 
       - name: Install the Android SDK components the project uses
-        # NDK r16b + CMake 3.22.1 are what app/build.gradle asks for. If sdkmanager is not found,
-        # Gradle downloads the missing components by itself.
         run: |
           SDKMANAGER="${ANDROID_HOME:-$ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
           if [ -x "$SDKMANAGER" ]; then
