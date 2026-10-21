@@ -8,7 +8,7 @@ struct AppPlatform_android23: AppPlatform_android
 	virtual ~AppPlatform_android23() {
 	}
 	virtual AssetFile readAssetFile(const std::string& a3){
-		if(this->initialized){
+		if(this->initialized && this->assetManager){
 			AAsset* v7 = AAssetManager_open(this->assetManager, a3.c_str(), AASSET_MODE_BUFFER);
 			if(!v7) return AppPlatform_android::readAssetFile(a3);
 			off_t len = AAsset_getLength(v7);
