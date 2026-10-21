@@ -1,0 +1,4 @@
+*.swp
+*.kate-swp
+build/
+CMakeLists.txt.user

@@ -1,0 +1,56 @@
+name: Build APK (arm64-v8a)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    # ubuntu-22.04 runners are being retired (unsupported from 2027-04-17), so use 24.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install the Android SDK components the project uses
+        # NDK r16b + CMake 3.22.1 are what app/build.gradle asks for. If sdkmanager is not found,
+        # Gradle downloads the missing components by itself.
+        run: |
+          SDKMANAGER="${ANDROID_HOME:-$ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+          if [ -x "$SDKMANAGER" ]; then
+            yes | "$SDKMANAGER" --licenses > /dev/null || true
+            "$SDKMANAGER" --install "platforms;android-34" "build-tools;34.0.0" "ndk;16.1.4479499" "cmake;3.22.1"
+          else
+            echo "sdkmanager not found, Gradle will download the missing components"
+          fi
+
+      - name: Create the debug keystore (the release APK is signed with it so it can be installed)
+        run: |
+          mkdir -p ~/.android
+          if [ ! -f ~/.android/debug.keystore ]; then
+            keytool -genkeypair -keystore ~/.android/debug.keystore -storepass android -keypass android \
+              -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Build the APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Upload the APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: MCPE-0.8.1-RD132211-arm64-v8a
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error

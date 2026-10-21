@@ -1,0 +1,68 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.mojang.minecraftpe'
+    compileSdk 34
+    ndkVersion '16.1.4479499'
+    lintOptions {
+        checkReleaseBuilds false
+        //If you want to continue even if errors found use following line
+        abortOnError false
+    }
+    defaultConfig {
+        applicationId "net.skidcode.gh.mcpe081decomp"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        // Only the 64 bit ARM build (arm64-v8a)
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+        externalNativeBuild {
+            cmake {
+                cppFlags ''
+                abiFilters 'arm64-v8a'
+            }
+        }
+    }
+
+    packaging{
+        resources{
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/com/android/build/**"
+            excludes += "META-INF/version-control-info.textproto"
+            excludes += "org/apache/**"
+            excludes += "mozilla/*"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Signed with the debug key so the release APK (optimized native code) can be installed directly
+            signingConfig signingConfigs.debug
+        }
+
+        debug {
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.22.1'
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+}
