@@ -453,8 +453,7 @@ void android_main(struct android_app* state) {
 	}
 	bool actFinished = 0;
 	bool hasInit = 0;
-	appPlatform.field_10C = activity;
-	//XXX dword_D6E045A0 = (int)appPlatform.field_10C->assetManager;
+	appPlatform.initWithActivity(activity);
 	while(1){
 		int outEvents;
 		struct android_poll_source* outData;
