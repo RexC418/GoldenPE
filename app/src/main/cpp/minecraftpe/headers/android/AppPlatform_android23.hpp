@@ -27,7 +27,7 @@ struct AppPlatform_android23: AppPlatform_android
 			}
 			return AppPlatform_android::readAssetFile(a3);
 		}else{
-			return AssetFile(0, -1);
+			return AppPlatform_android::readAssetFile(a3);
 		}
 	}
 	virtual void initWithActivity(ANativeActivity* a2){
